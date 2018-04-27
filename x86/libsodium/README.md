@@ -31,7 +31,7 @@ tar xf libsodium-1.0.16.tar.gz
 ```
 cd libsodium-1.0.16
 ./autogen.sh
-./configure --prefix=$HOME/libsodium_x86 --disable-soname-versions
+./configure --prefix=$HOME/libsodium_x86 --disable-soname-versions --host=i686-linux-android
 make
 make install
 ```
