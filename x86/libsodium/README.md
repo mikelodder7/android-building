@@ -30,7 +30,8 @@ tar xf libsodium-1.0.16.tar.gz
 ## Configure and build libsodium
 ```
 cd libsodium-1.0.16
-./configure --prefix=$HOME/libsodium_x86
+./autogen.sh
+./configure --prefix=$HOME/libsodium_x86 --disable-soname-versions
 make
 make install
 ```

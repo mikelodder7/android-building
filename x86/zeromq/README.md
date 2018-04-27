@@ -34,7 +34,7 @@ tar xf zeromq-4.2.5.tar.gz
 ```
 cd zeromq-4.2.5
 ./autogen.sh
-./configure --enable-static --with-libsodium=$HOME/libsodium_x86 --host=i686-linux-android --prefix=$HOME/libzmq_x86 LDFLAGS="-L$HOME/libzmq_x86/lib -D__ANDROID_API__=21" CPPFLAGS="-fPIC -I$HOME/libzmq_x86/include -D__ANDROID_API__=21" LIBS="-lgcc"
+./configure --without-docs --enable-static --with-libsodium=$HOME/libsodium_x86 --host=i686-linux-android --prefix=$HOME/libzmq_x86 LDFLAGS="-L$HOME/libzmq_x86/lib -D__ANDROID_API__=21 -avoid-version" CPPFLAGS="-fPIC -I$HOME/libzmq_x86/include -D__ANDROID_API__=21" LIBS="-lgcc"
 make
 make install
 ```
