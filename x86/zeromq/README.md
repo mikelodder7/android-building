@@ -30,7 +30,7 @@ wget https://github.com/zeromq/libzmq/releases/download/v4.2.5/zeromq-4.2.5.tar.
 tar xf zeromq-4.2.5.tar.gz
 ```
 
-## Configure and build libsodium
+## Configure and build zeromq
 ```
 cd zeromq-4.2.5
 ./autogen.sh
