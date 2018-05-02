@@ -37,7 +37,7 @@ chmod a+x setenv-android.sh
 ## Configure and build openssl
 ```
 cd openssl-1.1.0.h
-./config -D__ANDROID_API__=21 --openssldir=$HOME/openssl_x86 --prefix=$HOME/openssl_x86
+./config -D__ANDROID_API__=21 --openssldir=$HOME/openssl_x86 --prefix=$HOME/openssl_x86 -lc -lgcc -ldl
 make
 make install
 ```
