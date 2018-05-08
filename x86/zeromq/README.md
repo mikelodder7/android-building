@@ -36,8 +36,8 @@ cd zeromq-4.2.5
 ./autogen.sh
 ./configure \
 CPP=/home/vagrant/x86/bin/i686-linux-android-cpp \
-CC=/home/vagrant/x86/bin/i686-linux-android-gcc \
-CXX=/home/vagrant/x86/bin/i686-linux-android-g++ \
+CC=/home/vagrant/x86/bin/i686-linux-android-clang \
+CXX=/home/vagrant/x86/bin/i686-linux-android-clang++ \
 LD=/home/vagrant/x86/bin/i686-linux-android-ld \
 AS=/home/vagrant/x86/bin/i686-linux-android-as \
 AR=/home/vagrant/x86/bin/i686-linux-android-ar \
