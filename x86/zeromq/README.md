@@ -42,12 +42,12 @@ LD=/home/vagrant/x86/bin/i686-linux-android-ld \
 AS=/home/vagrant/x86/bin/i686-linux-android-as \
 AR=/home/vagrant/x86/bin/i686-linux-android-ar \
 RANLIB=/home/vagrant/x86/bin/i686-linux-android-ranlib \
-CFLAGS="-I/home/vagrant/zeromq-4.2.5/prefix/i686-linux-android-4.9/include -D__ANDROID_API__=21 -fPIC" \
-CPPFLAGS="-I/home/vagrant/zeromq-4.2.5/prefix/i686-linux-android-4.9/include -D__ANDROID_API__=21 -fPIC" \
-CXXFLAGS="-I/home/vagrant/zeromq-4.2.5/prefix/i686-linux-android-4.9/include -D__ANDROID_API__=21 -fPIC" \
-LDFLAGS="-L/home/vagrant/zeromq-4.2.5/prefix/i686-linux-android-4.9/lib -D__ANDROID_API__=21" \
-LIBS="-lc -lgcc -ldl -static-libstdc++ -latomic" \
-PKG_CONFIG_PATH=/home/vagrant/zeromq-4.2.5/prefix/i686-linux-android-4.9/lib/pkgconfig \
+CFLAGS="-I/home/vagrant/libzmq_x86/include -D__ANDROID_API__=21 -fPIC" \
+CPPFLAGS="-I/home/vagrant/libzmq_x86/include -D__ANDROID_API__=21 -fPIC" \
+CXXFLAGS="-I/home/vagrant/libzmq_x86/include -D__ANDROID_API__=21 -fPIC" \
+LDFLAGS="-L/home/vagrant/libzmq_x86/lib -D__ANDROID_API__=21" \
+LIBS="-lc -lgcc -ldl -static-libstdc++ -lc++abi -latomic" \
+PKG_CONFIG_PATH=/home/vagrant/libzmq_x86/lib/pkgconfig \
 --host=i686-linux-android \
 --prefix=/home/vagrant/libzmq_x86 \
 --with-libsodium=/home/vagrant/libsodium_x86 \
