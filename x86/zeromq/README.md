@@ -52,8 +52,12 @@ PKG_CONFIG_PATH=/home/vagrant/libzmq_x86/lib/pkgconfig \
 --prefix=/home/vagrant/libzmq_x86 \
 --with-libsodium=/home/vagrant/libsodium_x86 \
 --without-docs \
+--disable-shared \
 --enable-static \
 --with-sysroot=/home/vagrant/x86/sysroot
 make
 make install
 ```
+
+cd $HOME/libzmq_x86/lib
+$CC -shared -o libzmq.so -Wl,--whole-archive lib/libzmq.a $HOME/x86/i686-linux-android/lib/libatomic.a $HOME/x86/i686-linux-android/lib/libstdc++.a -Wl,--no-whole-archive
