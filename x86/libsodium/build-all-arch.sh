@@ -24,10 +24,10 @@ if [ ! -d "libsodium-${SODIUM_VERSION}" ] ; then
 fi
 
 #archs=(arm arm64 x86 x86_64 mips mips64)
-archs=(arm arm64 x86 x86_64)
-
 if [ $# -gt 0 ] ; then
     archs=$@
+else
+    archs=(arm arm64 x86 x86_64)
 fi
 
 OLDPATH=${PATH}

@@ -2,6 +2,7 @@
 #
 # http://wiki.openssl.org/index.php/Android
 #
+
 set -e
 rm -rf ${PWD}/openssl_prebuilt
 
@@ -23,11 +24,13 @@ if [ ! -d "${OPENSSL_VERSION}" ] ; then
 fi
 
 #archs=(arm arm64 x86 x86_64 mips mips64)
-archs=(arm arm64 x86 x86_64)
-
 if [ $# -gt 0 ] ; then
     archs=$@
+else
+    archs=(arm arm64 x86 x86_64)
 fi
+
+echo "Building for ${archs}"
 
 OLDPATH=$PATH
 
@@ -89,6 +92,7 @@ for arch in ${archs[@]}; do
     mkdir -p ${TGT_DIR}
     export PATH=${OLDPATH}
 
+    echo "Setting ${arch} environment"
     . ./setenv-android.sh
 
     command pushd ${OPENSSL_VERSION} > /dev/null
