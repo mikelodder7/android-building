@@ -30,7 +30,7 @@ else
     archs=(arm arm64 x86 x86_64)
 fi
 
-echo "Building for ${archs}"
+echo "Building for ${archs[@]}"
 
 OLDPATH=$PATH
 
