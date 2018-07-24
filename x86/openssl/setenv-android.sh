@@ -22,12 +22,12 @@ _ANDROID_NDK="android-ndk-r16b"
 # list in $ANDROID_NDK_ROOT/toolchains. This value is always used.
 # _ANDROID_EABI="x86-4.6"
 # _ANDROID_EABI="arm-linux-androideabi-4.6"
-_ANDROID_EABI="x86-4.9"
+_ANDROID_EABI="x86_64-4.9"
 
 # Set _ANDROID_ARCH to the architecture you are building for.
 # This value is always used.
 # _ANDROID_ARCH=arch-x86
-_ANDROID_ARCH=arch-x86
+_ANDROID_ARCH=arch-x86_64
 
 # Set _ANDROID_API to the API you want to use. You should set it
 # to one of: android-14, android-9, android-8, android-14, android-5
@@ -117,17 +117,39 @@ if [ -z "$ANDROID_TOOLCHAIN" ] || [ ! -d "$ANDROID_TOOLCHAIN" ]; then
   # exit 1
 fi
 
+export RELEASE=2.6.37
+export SYSTEM=android
+
 case $_ANDROID_ARCH in
 	arch-arm)	  
-      ANDROID_TOOLS="arm-linux-androideabi-gcc arm-linux-androideabi-ranlib arm-linux-androideabi-ld"
+      export MACHINE=armv7
+      export ARCH=arm
+      export CROSS_COMPILE="arm-linux-androideabi-"
+      #export SYSTEM=android-armeabi
+	  ;;
+	arch-arm64)
+      export MACHINE=armv8
+      export ARCH=arm64
+      export CROSS_COMPILE="aarch64-linux-android-"
+      #export SYSTEM=android64-aarch64
 	  ;;
 	arch-x86)	  
-      ANDROID_TOOLS="i686-linux-android-gcc i686-linux-android-ranlib i686-linux-android-ld"
+	  export MACHINE=i686
+      export ARCH=x86
+	  export CROSS_COMPILE="i686-linux-android-"
+      #export SYSTEM=android-x86
 	  ;;	  
+	arch-x86_64)
+	  export MACHINE=x86_64
+      export ARCH=x86_64
+	  export CROSS_COMPILE="x86_64-linux-android-"
+      #export SYSTEM=android64
+	  ;;
 	*)
 	  echo "ERROR ERROR ERROR"
 	  ;;
 esac
+ANDROID_TOOLS="${CROSS_COMPILE}gcc ${CROSS_COMPILE}ranlib ${CROSS_COMPILE}ld"
 
 for tool in $ANDROID_TOOLS
 do
@@ -190,22 +212,7 @@ if [ -z "$FIPS_SIG" ] || [ ! -e "$FIPS_SIG" ]; then
 fi
 
 #####################################################################
-
 # Most of these should be OK (MACHINE, SYSTEM, ARCH). RELEASE is ignored.
-export MACHINE=armv7
-export RELEASE=2.6.37
-export SYSTEM=android
-export ARCH=arm
-export CROSS_COMPILE="arm-linux-androideabi-"
-
-if [ "$_ANDROID_ARCH" == "arch-x86" ]; then
-	export MACHINE=i686
-	export RELEASE=2.6.37
-	export SYSTEM=android
-	export ARCH=x86
-	export CROSS_COMPILE="i686-linux-android-"
-fi
-
 # For the Android toolchain
 # https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
 export ANDROID_SYSROOT="$NDK_TOOLCHAIN_DIR/sysroot"
