@@ -1,25 +1,41 @@
 #!/bin/bash
-#
-# http://wiki.openssl.org/index.php/Android
-#
 
 set -e
-rm -rf ${PWD}/openssl_prebuilt
 
-if [ ! -d android-ndk-r16b ] ; then
-    if [ ! -f android-ndk-r16b-linux-x86_64.zip ] ; then
-        wget -q https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
-    fi
-    unzip -qq android-ndk-r16b-linux-x86_64.zip
+GREEN="[0;32m"
+NC="[0m"
+ESCAPE="\e"
+NDK=android-ndk-r17b-linux-x86_64
+
+UNAME=$(uname | tr '[:upper:]' '[:lower:]')
+
+if [ ${UNAME} = "darwin" ] ; then
+    ESCAPE="\x1B"
+    NDK=android-ndk-r17b-darwin-x86_64
 fi
-export ANDROID_NDK_ROOT="${PWD}/android-ndk-r16b"
+
+if [ ! -d "${UNAME}-android-ndk-r17b" ] ; then
+    if [ ! -f "${NDK}.zip" ] ; then
+        echo "Downloading ${NDK}"
+        wget -q https://dl.google.com/android/repository/${NDK}.zip
+    fi
+    echo "Extracting ${NDK}"
+    unzip -qq -o ${UNAME}-android-ndk-r17b ${NDK}.zip
+fi
+export ANDROID_NDK_ROOT="${PWD}/${UNAME}-android-ndk-r17b"
 
 OPENSSL_VERSION=openssl-1.1.0h
 
 if [ ! -d "${OPENSSL_VERSION}" ] ; then
     if [ ! -f ${OPENSSL_VERSION}.tar.gz ] ; then
+        echo "Downloading ${OPENSSL_VERSION}"
         wget -q https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
     fi 
+    if [ ! -f ${OPENSSL_VERSION}.tar.gz ] ; then
+        echo "Can't find ${OPENSSL_VERSION}.tar.gz"
+        exit 1
+    fi
+    echo "Extracting ${OPENSSL_VERSION}"
     tar xf ${OPENSSL_VERSION}.tar.gz
 fi
 
@@ -30,17 +46,18 @@ else
     archs=(arm arm64 x86 x86_64)
 fi
 
-echo "Building for ${archs[@]}"
+echo -e "${ESCAPE}${GREEN}Building for ${archs[@]}${ESCAPE}${NC}"
 
 OLDPATH=$PATH
 
 for arch in ${archs[@]}; do
-    export NDK_TOOLCHAIN_DIR=${PWD}/${arch}
+    export NDK_TOOLCHAIN_DIR="${PWD}/${UNAME}-${arch}"
     if [ ! -d "${NDK_TOOLCHAIN_DIR}" ] ; then
         echo "Creating toolchain directory ${NDK_TOOLCHAIN_DIR}"
         python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${arch} --api 21 --install-dir ${NDK_TOOLCHAIN_DIR}
     fi
     #xLIB="/lib"
+    xCFLAGS="-D__ANDROID_API__=21 -mandroid -O3 -lc -lgcc -ldl"
     case ${arch} in
         "arm")
             _ANDROID_TARGET_SELECT=arch-arm
@@ -89,26 +106,18 @@ for arch in ${archs[@]}; do
     esac
 
     TGT_DIR="${PWD}/openssl_prebuilt/${arch}"
+    rm -rf ${TGT_DIR}
     mkdir -p ${TGT_DIR}
     export PATH=${OLDPATH}
 
-    echo "Setting ${arch} environment"
+    echo -e "${ESCAPE}${GREEN}Setting ${arch} environment${ESCAPE}${NC}"
     . ./setenv-android.sh
 
     command pushd ${OPENSSL_VERSION} > /dev/null
 
-    xCFLAGS="-D__ANDROID_API__=21 -mandroid -O3 -lc -lgcc -ldl"
-
     perl -pi -e 's/install: install_sw install_ssldirs install_docs/install: install_sw install_ssldirs/g' Makefile
     ./Configure shared no-threads no-asm no-zlib no-ssl3 no-comp no-hw no-engine --prefix=${TGT_DIR} --openssldir=${TGT_DIR} ${configure_platform} ${xCFLAGS}
 
-    # patch SONAME
-
-    #perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
-    #perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
-    # quote injection for proper SONAME
-    #perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
-    #perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
     make clean
     make depend
     make CALC_VERSIONS="SHLIB_COMPAT=; SHLIB_SOVER=" all
@@ -118,10 +127,19 @@ for arch in ${archs[@]}; do
 
     command pushd ${TGT_DIR} > /dev/null
 
-    for dir in bin misc openssl.cnf.dist share certs openssl.cnf private; do
+    for dir in bin misc openssl.cnf.dist share certs openssl.cnf private lib/engines-* lib/pkgconfig; do
         rm -rf ${dir}
     done
 
+    rm -f lib/libcrypto.so
+    mv lib/libcrypto.so.1.1 lib/libcrypto.so
+    rm -f lib/libssl.so
+    mv lib/libssl.so.1.1 lib/libssl.so
+
     command popd > /dev/null
+
+    if [ ${arch} = "arm" ] ; then
+        cp -R ${TGT_DIR} ${PWD}/openssl_prebuilt/armv7
+    fi
 done
 exit 0
