@@ -2,28 +2,30 @@
 
 set -e
 
+NDK_VERSION=android-ndk-r17b
+NDK_API=21
+RED="[0;31m"
 GREEN="[0;32m"
 BLUE="[0;34m"
 NC="[0m"
-ESCAPE="\e"
-NDK=android-ndk-r17b-linux-x86_64
-
+ESCAPE="\033"
 UNAME=$(uname | tr '[:upper:]' '[:lower:]')
+NDK=${NDK_VERSION}-${UNAME}-$(uname -m)
 
-if [ ${UNAME} = "darwin" ] ; then
-    ESCAPE="\x1B"
-    NDK=android-ndk-r17b-darwin-x86_64
-fi
-
-if [ ! -d "${UNAME}-android-ndk-r17b" ] ; then
+if [ ! -d "${UNAME}-${NDK_VERSION}" ] ; then
     if [ ! -f "${NDK}.zip" ] ; then
         echo "Downloading ${NDK}"
         wget -q https://dl.google.com/android/repository/${NDK}.zip
     fi
-    echo "Extracting ${NDK}"
-    unzip -qq -o ${UNAME}-android-ndk-r17b ${NDK}.zip
+    if [ ! -f "${NDK}.zip" ] ; then
+        echo STDERR "Can't find ${NDK}"
+        exit 1
+    fi
+    echo -e "${ESCAPE}${GREEN}Extracting ${NDK}${ESCAPE}${NC}"
+    unzip -o -qq ${NDK}.zip
+    mv ${NDK_VERSION} ${UNAME}-${NDK_VERSION}
 fi
-export ANDROID_NDK_ROOT="${PWD}/${UNAME}-android-ndk-r17b"
+export ANDROID_NDK_ROOT="${PWD}/${UNAME}-${NDK_VERSION}"
 
 SODIUM_VERSION=1.0.14
 
@@ -40,7 +42,6 @@ if [ ! -d "libsodium-${SODIUM_VERSION}" ] ; then
     tar xf libsodium-${SODIUM_VERSION}.tar.gz
 fi
 
-#archs=(arm arm64 x86 x86_64 mips mips64)
 if [ $# -gt 0 ] ; then
     archs=$@
 else
@@ -97,7 +98,7 @@ for arch in ${archs[@]}; do
     export NDK_TOOLCHAIN_DIR="${PWD}/${UNAME}-${TARGET_ARCH}"
     if [ ! -d "${NDK_TOOLCHAIN_DIR}" ] ; then
         echo "Creating toolchain directory ${NDK_TOOLCHAIN_DIR}"
-        python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${TARGET_ARCH} --api 21 --install-dir ${NDK_TOOLCHAIN_DIR}
+        python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${TARGET_ARCH} --api ${NDK_API} --install-dir ${NDK_TOOLCHAIN_DIR} || exit 1
     fi
     export PATH=${NDK_TOOLCHAIN_DIR}/bin:${OLDPATH}
     TGT_DIR="${PWD}/sodium_prebuilt/${arch}"

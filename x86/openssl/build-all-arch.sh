@@ -2,27 +2,30 @@
 
 set -e
 
+NDK_VERSION=android-ndk-r17b
+NDK_API=21
+RED="[0;31m"
 GREEN="[0;32m"
+BLUE="[0;34m"
 NC="[0m"
-ESCAPE="\e"
-NDK=android-ndk-r17b-linux-x86_64
-
+ESCAPE="\033"
 UNAME=$(uname | tr '[:upper:]' '[:lower:]')
+NDK=${NDK_VERSION}-${UNAME}-$(uname -m)
 
-if [ ${UNAME} = "darwin" ] ; then
-    ESCAPE="\x1B"
-    NDK=android-ndk-r17b-darwin-x86_64
-fi
-
-if [ ! -d "${UNAME}-android-ndk-r17b" ] ; then
+if [ ! -d "${UNAME}-${NDK_VERSION}" ] ; then
     if [ ! -f "${NDK}.zip" ] ; then
         echo "Downloading ${NDK}"
         wget -q https://dl.google.com/android/repository/${NDK}.zip
     fi
-    echo "Extracting ${NDK}"
-    unzip -qq -o ${UNAME}-android-ndk-r17b ${NDK}.zip
+    if [ ! -f "${NDK}.zip" ] ; then
+        echo STDERR "Can't find ${NDK}"
+        exit 1
+    fi
+    echo -e "${ESCAPE}${GREEN}Extracting ${NDK}${ESCAPE}${NC}"
+    unzip -o -qq ${NDK}.zip
+    mv ${NDK_VERSION} ${UNAME}-${NDK_VERSION}
 fi
-export ANDROID_NDK_ROOT="${PWD}/${UNAME}-android-ndk-r17b"
+export ANDROID_NDK_ROOT="${PWD}/${UNAME}-${NDK_VERSION}"
 
 OPENSSL_VERSION=openssl-1.1.0h
 
@@ -39,7 +42,6 @@ if [ ! -d "${OPENSSL_VERSION}" ] ; then
     tar xf ${OPENSSL_VERSION}.tar.gz
 fi
 
-#archs=(arm arm64 x86 x86_64 mips mips64)
 if [ $# -gt 0 ] ; then
     archs=$@
 else
@@ -54,24 +56,20 @@ for arch in ${archs[@]}; do
     export NDK_TOOLCHAIN_DIR="${PWD}/${UNAME}-${arch}"
     if [ ! -d "${NDK_TOOLCHAIN_DIR}" ] ; then
         echo "Creating toolchain directory ${NDK_TOOLCHAIN_DIR}"
-        python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${arch} --api 21 --install-dir ${NDK_TOOLCHAIN_DIR}
+        python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${arch} --api ${NDK_API} --install-dir ${NDK_TOOLCHAIN_DIR} || exit 1
     fi
-    #xLIB="/lib"
     xCFLAGS="-D__ANDROID_API__=21 -mandroid -O3 -lc -lgcc -ldl"
     case ${arch} in
         "arm")
             _ANDROID_TARGET_SELECT=arch-arm
             _ANDROID_ARCH=arch-arm
             _ANDROID_EABI=arm-linux-androideabi-4.9
-            #configure_platform="android-armv7"
             configure_platform="android-armeabi"
             ;;
         "arm64")
             _ANDROID_TARGET_SELECT=arch-arm64
             _ANDROID_ARCH=arch-arm64
             _ANDROID_EABI=aarch64-linux-android-4.9
-            #no xLIB="/lib64"
-            #configure_platform="linux-generic64 -DB_ENDIAN"
             configure_platform="android64-aarch64"
             ;;
         "mips")
@@ -98,7 +96,6 @@ for arch in ${archs[@]}; do
             _ANDROID_ARCH=arch-x86_64
             _ANDROID_EABI=x86_64-4.9
             xLIB="/lib64"
-            #configure_platform="linux-generic64"
             configure_platform="android64"
             ;;
         *)
@@ -110,8 +107,10 @@ for arch in ${archs[@]}; do
     mkdir -p ${TGT_DIR}
     export PATH=${OLDPATH}
 
-    echo -e "${ESCAPE}${GREEN}Setting ${arch} environment${ESCAPE}${NC}"
+    echo -e "${ESCAPE}${BLUE}Setting ${arch} environment${ESCAPE}${NC}"
     . ./setenv-android.sh
+
+    echo -e "${ESCAPE}${BLUE}Making ${arch}${ESCAPE}${NC}"
 
     command pushd ${OPENSSL_VERSION} > /dev/null
 
