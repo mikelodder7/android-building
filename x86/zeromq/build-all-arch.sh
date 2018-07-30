@@ -2,8 +2,10 @@
 
 set -e
 
-NDK_VERSION=android-ndk-r17b
+NDK_VERSION=android-ndk-r16b
 NDK_API=21
+STL=gnustl
+COMPILER=clang
 RED="[0;31m"
 GREEN="[0;32m"
 BLUE="[0;34m"
@@ -11,6 +13,7 @@ NC="[0m"
 ESCAPE="\033"
 UNAME=$(uname | tr '[:upper:]' '[:lower:]')
 NDK=${NDK_VERSION}-${UNAME}-$(uname -m)
+
 
 if [ ! -d "${UNAME}-${NDK_VERSION}" ] ; then
     if [ ! -f "${NDK}.zip" ] ; then
@@ -109,7 +112,7 @@ for arch in ${archs[@]}; do
     export NDK_TOOLCHAIN_DIR="${PWD}/${UNAME}-${TARGET_ARCH}"
     if [ ! -d "${NDK_TOOLCHAIN_DIR}" ] ; then
         echo "Creating toolchain directory ${NDK_TOOLCHAIN_DIR}"
-        python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${TARGET_ARCH} --api ${NDK_API} --install-dir ${NDK_TOOLCHAIN_DIR} || exit 1
+        python3 ${ANDROID_NDK_ROOT}/build/tools/make_standalone_toolchain.py --arch ${TARGET_ARCH} --stl=gnustl --api ${NDK_API} --install-dir ${NDK_TOOLCHAIN_DIR} || exit 1
     fi
     SODIUM_DIR="${PWD}/sodium_prebuilt/${arch}"
     if [ ! -d "${SODIUM_DIR}" ] ; then
@@ -129,8 +132,8 @@ for arch in ${archs[@]}; do
 
     ./autogen.sh
     ./configure CPP=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-cpp \
-                 CC=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-clang \
-                CXX=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-clang++ \
+                 CC=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-${COMPILER} \
+                CXX=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-${COMPILER}++ \
                  LD=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-ld \
                  AS=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-as \
                  AR=${NDK_TOOLCHAIN_DIR}/bin/${TARGET_HOST}-ar \
@@ -139,7 +142,7 @@ for arch in ${archs[@]}; do
            CPPFLAGS="-I${TGT_DIR}/include/ -D__ANDROID_API__=21 -fPIC" \
            CXXFLAGS="-I${TGT_DIR}/include/ -D__ANDROID_API__=21 -fPIC" \
             LDFLAGS="-I${TGT_DIR}/lib/ -D__ANDROID_API__=21" \
-               LIBS="-lc -lgcc -ldl -lc++abi -latomic" \
+               LIBS="-lc -lgcc -ldl -latomic" \
     PKG_CONFIG_PATH="${TGT_DIR}/lib/pkgconfig" \
                 --host=${TARGET_HOST} \
                 --prefix=${TGT_DIR} \
