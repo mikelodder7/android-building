@@ -15,7 +15,7 @@ NDK=${NDK_VERSION}-${UNAME}-$(uname -m)
 if [ ! -d "${UNAME}-${NDK_VERSION}" ] ; then
     if [ ! -f "${NDK}.zip" ] ; then
         echo "Downloading ${NDK}"
-        wget -q https://dl.google.com/android/repository/${NDK}.zip
+        curl -sSLO https://dl.google.com/android/repository/${NDK}.zip
     fi
     if [ ! -f "${NDK}.zip" ] ; then
         echo STDERR "Can't find ${NDK}"
@@ -32,7 +32,7 @@ SODIUM_VERSION=1.0.14
 if [ ! -d "libsodium-${SODIUM_VERSION}" ] ; then
     if [ ! -f "libsodium-${SODIUM_VERSION}.tar.gz" ] ; then
         echo "Downloading libsodium-${SODIUM_VERSION}"
-        wget -q https://github.com/jedisct1/libsodium/releases/download/${SODIUM_VERSION}/libsodium-${SODIUM_VERSION}.tar.gz || exit 1
+        curl -sSLO https://github.com/jedisct1/libsodium/releases/download/${SODIUM_VERSION}/libsodium-${SODIUM_VERSION}.tar.gz || exit 1
     fi 
     if [ ! -f "libsodium-${SODIUM_VERSION}.tar.gz" ] ; then
         echo "Can't find libsodium-${SODIUM_VERSION}.tar.gz"

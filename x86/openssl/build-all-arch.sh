@@ -15,7 +15,7 @@ NDK=${NDK_VERSION}-${UNAME}-$(uname -m)
 if [ ! -d "${UNAME}-${NDK_VERSION}" ] ; then
     if [ ! -f "${NDK}.zip" ] ; then
         echo "Downloading ${NDK}"
-        wget -q https://dl.google.com/android/repository/${NDK}.zip
+        curl -sSLO https://dl.google.com/android/repository/${NDK}.zip
     fi
     if [ ! -f "${NDK}.zip" ] ; then
         echo STDERR "Can't find ${NDK}"
@@ -32,7 +32,7 @@ OPENSSL_VERSION=openssl-1.1.0h
 if [ ! -d "${OPENSSL_VERSION}" ] ; then
     if [ ! -f ${OPENSSL_VERSION}.tar.gz ] ; then
         echo "Downloading ${OPENSSL_VERSION}"
-        wget -q https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
+        curl -sSLO https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
     fi 
     if [ ! -f ${OPENSSL_VERSION}.tar.gz ] ; then
         echo "Can't find ${OPENSSL_VERSION}.tar.gz"

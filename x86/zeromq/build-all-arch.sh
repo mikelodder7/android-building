@@ -18,7 +18,7 @@ NDK=${NDK_VERSION}-${UNAME}-$(uname -m)
 if [ ! -d "${UNAME}-${NDK_VERSION}" ] ; then
     if [ ! -f "${NDK}.zip" ] ; then
         echo "Downloading ${NDK}"
-        wget -q https://dl.google.com/android/repository/${NDK}.zip
+        curl -sSLO https://dl.google.com/android/repository/${NDK}.zip
     fi
     if [ ! -f "${NDK}.zip" ] ; then
         echo STDERR "Can't find ${NDK}"
@@ -35,7 +35,7 @@ ZMQ_VERSION=4.2.5
 if [ ! -d "zeromq-${ZMQ_VERSION}" ] ; then
     if [ ! -f "zeromq-${ZMQ_VERSION}.tar.gz" ] ; then
         echo "Downloading zeromq-${ZMQ_VERSION}"
-        wget -q https://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz || exit 1
+        curl -sSLO https://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz || exit 1
     fi 
     if [ ! -f "zeromq-${ZMQ_VERSION}.tar.gz" ] ; then
         echo "Can't find zeromq-${ZMQ_VERSION}.tar.gz"
